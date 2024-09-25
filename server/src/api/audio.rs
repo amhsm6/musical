@@ -2,12 +2,14 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use axum::routing;
 use axum::routing::Router;
-use axum::extract::{Path, State};
+use axum::extract::{State, Query};
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 
-async fn get_albums(conn: State<Arc<Mutex<PgConnection>>>) -> String {
+async fn query(conn: State<Arc<Mutex<PgConnection>>>, query: Query<String>) -> String {
     let mut conn = conn.lock().await;
+
+    tokio::time::sleep(tokio::time::Duration::from_millis(1509)).await;
 
     let albums = crate::schema::audio::table
         .filter(crate::schema::audio::album.is_not_null())
@@ -19,17 +21,9 @@ async fn get_albums(conn: State<Arc<Mutex<PgConnection>>>) -> String {
     serde_json::to_string(&albums).unwrap()
 }
 
-async fn get_album(conn: State<Arc<Mutex<PgConnection>>>, id: Path<i32>) -> String {
-    // let mut conn = conn.lock().await;
-    let id = *id;
-
-    format!("{id}")
-}
-
 pub fn router() -> Router<Arc<Mutex<PgConnection>>> {
     Router::new()
-        .route("/albums", routing::get(get_albums))
-        .route("/album/:id", routing::get(get_album))
+        .route("/query", routing::get(query))
 }
 
 //        .route("/track/{id}", web::get().to(get_track))

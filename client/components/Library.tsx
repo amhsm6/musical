@@ -10,16 +10,14 @@ type Props = {
 };
 
 export default function Library({ query, style }: Props): React.ReactNode {
-    const { data, isLoading, error } = useSWR("http://localhost:3015/api/audio/albums", jsonfetch);
+    const { data, isLoading, error } = useSWR(`http://localhost:3015/api/audio/query?q=${query}`, jsonfetch);
 
     if (isLoading) {
         return <ActivityIndicator />;
     }
 
     if (error) {
-        return (
-            <Text>{ error.toString() }</Text>
-        );
+        return <Text>{ error.toString() }</Text>;
     }
 
     return (

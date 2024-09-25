@@ -11,7 +11,8 @@ const styles = StyleSheet.create({
     },
     searchbar: {
         width: "60%",
-        marginTop: 20
+        marginTop: 20,
+        marginBottom: 20
     }
 });
 

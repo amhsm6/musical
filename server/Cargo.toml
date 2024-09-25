@@ -10,9 +10,10 @@ name = "srv"
 name = "initdb"
 
 [dependencies]
-tokio = { version = "*", features = ["full"] }
-serde_json = "*"
-dotenvy = "*"
-axum = "*"
-diesel = { version = "*", features = ["postgres"] }
-symphonia = { version = "*", features = ["all"] }
+tokio = { version = "1.40.0", features = ["full"] }
+serde_json = "1.0.128"
+dotenvy = "0.15.7"
+http = "1.1.0"
+axum = "0.7.6"
+diesel = { version = "2.2.4", features = ["postgres"] }
+symphonia = { version = "0.5.4", features = ["all"] }
