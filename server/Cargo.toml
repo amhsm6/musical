@@ -11,6 +11,7 @@ name = "initdb"
 
 [dependencies]
 tokio = { version = "1.40.0", features = ["full"] }
+serde = { version = "1.0.210", features = ["derive"] }
 serde_json = "1.0.128"
 dotenvy = "0.15.7"
 http = "1.1.0"

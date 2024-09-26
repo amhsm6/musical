@@ -4,7 +4,6 @@ import { AntDesign } from "@expo/vector-icons";
 
 const styles = StyleSheet.create({
     searchbar: {
-        display: "flex",
         flexDirection: "row",
         alignItems: "center",
         padding: 3,

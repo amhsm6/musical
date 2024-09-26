@@ -1,24 +1,59 @@
 use std::sync::Arc;
+use std::collections::HashMap;
 use tokio::sync::Mutex;
-use axum::routing;
+use serde::{Serialize, Deserialize};
+use axum::{routing, Json};
 use axum::routing::Router;
 use axum::extract::{State, Query};
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 
-async fn query(conn: State<Arc<Mutex<PgConnection>>>, query: Query<String>) -> String {
-    let mut conn = conn.lock().await;
+#[derive(Deserialize)]
+struct QueryParams {
+    q: Option<String>
+}
 
-    tokio::time::sleep(tokio::time::Duration::from_millis(1509)).await;
+type QueryResult = HashMap<String, QueryAlbum>;
 
-    let albums = crate::schema::audio::table
-        .filter(crate::schema::audio::album.is_not_null())
-        .select(crate::schema::audio::album.assume_not_null())
-        .distinct()
-        .load::<String>(&mut *conn)
-        .unwrap();
-        
-    serde_json::to_string(&albums).unwrap()
+#[derive(Serialize)]
+struct QueryAlbum {
+    tracks: Vec<QueryTrack>
+}
+
+#[derive(Serialize)]
+struct QueryTrack {
+    id: i32,
+    title: String
+}
+
+async fn query(conn: State<Arc<Mutex<PgConnection>>>, Query(query): Query<QueryParams>) -> String {
+    let conn = &mut *conn.lock().await;
+
+    let query = query.q.unwrap_or("".to_string());
+    let query = query.split_whitespace().flat_map(|x| vec!["%", x]).collect::<String>() + "%";
+
+    let mut result: QueryResult = HashMap::new();
+
+    crate::schema::audio::table
+        .filter(
+            crate::schema::audio::title.ilike(&query)
+                .or(crate::schema::audio::album.ilike(&query))
+        )
+        .select((crate::schema::audio::id, crate::schema::audio::title, crate::schema::audio::album))
+        .load::<(i32, String, Option<String>)>(conn)
+        .unwrap()
+        .into_iter()
+        .for_each(|(id, title, album_title)| {
+            let album_title = album_title.unwrap_or("".to_string());
+
+            if !result.contains_key(&album_title) {
+                result.insert(album_title.clone(), QueryAlbum { tracks: Vec::new() });
+            }
+
+            result.get_mut(&album_title).unwrap().tracks.push(QueryTrack { id, title });
+        });
+
+    serde_json::to_string(&result).unwrap()
 }
 
 pub fn router() -> Router<Arc<Mutex<PgConnection>>> {

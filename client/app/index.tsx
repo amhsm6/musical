@@ -1,18 +1,22 @@
 import React, { useState } from "react";
-import { StyleSheet, View  } from "react-native";
+import { StyleSheet, Dimensions, View } from "react-native";
 import SearchBar from "@/components/SearchBar";
 import Library from "@/components/Library";
 
 const styles = StyleSheet.create({
     container: {
-        display: "flex",
         flexDirection: "column",
         alignItems: "center"
     },
     searchbar: {
         width: "60%",
         marginTop: 20,
-        marginBottom: 20
+        marginBottom: 10
+    },
+    library: {
+        width: "60%",
+        height: Dimensions.get("window").height - 100,
+        paddingHorizontal: 20
     }
 });
 
@@ -22,7 +26,7 @@ export default function Index(): React.ReactNode {
     return (
         <View style={ styles.container }>
             <SearchBar query={ query } setQuery={ setQuery } style={ styles.searchbar } />
-            <Library query={ query } />
+            <Library query={ query } style={ styles.library } />
         </View>
     );
 }

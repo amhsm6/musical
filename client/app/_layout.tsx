@@ -4,7 +4,7 @@ import { Stack } from "expo-router";
 export default function RootLayout() {
     return (
         <Stack>
-            <Stack.Screen name="index" options={{ title: "Musical" }} />
+            <Stack.Screen name="index" options={{ title: "Musical", headerShown: false }} />
         </Stack>
     );
 }
