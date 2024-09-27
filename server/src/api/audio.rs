@@ -1,8 +1,10 @@
+use crate::models::AudioTrack;
+
 use std::sync::Arc;
 use std::collections::HashMap;
 use tokio::sync::Mutex;
 use serde::{Serialize, Deserialize};
-use axum::{routing, Json};
+use axum::routing;
 use axum::routing::Router;
 use axum::extract::{State, Query};
 use diesel::prelude::*;
@@ -17,13 +19,19 @@ type QueryResult = HashMap<String, QueryAlbum>;
 
 #[derive(Serialize)]
 struct QueryAlbum {
+    album_artist: Option<String>,
     tracks: Vec<QueryTrack>
 }
 
 #[derive(Serialize)]
 struct QueryTrack {
     id: i32,
-    title: String
+    title: String,
+    artist: Option<String>,
+    track_number: Option<i32>,
+    track_total: Option<i32>,
+    disc_number: Option<i32>,
+    disc_total: Option<i32>
 }
 
 async fn query(conn: State<Arc<Mutex<PgConnection>>>, Query(query): Query<QueryParams>) -> String {
@@ -39,18 +47,28 @@ async fn query(conn: State<Arc<Mutex<PgConnection>>>, Query(query): Query<QueryP
             crate::schema::audio::title.ilike(&query)
                 .or(crate::schema::audio::album.ilike(&query))
         )
-        .select((crate::schema::audio::id, crate::schema::audio::title, crate::schema::audio::album))
-        .load::<(i32, String, Option<String>)>(conn)
+        .order_by((crate::schema::audio::disc_number.asc(), crate::schema::audio::track_number.asc()))
+        .select(AudioTrack::as_select())
+        .load(conn)
         .unwrap()
         .into_iter()
-        .for_each(|(id, title, album_title)| {
-            let album_title = album_title.unwrap_or("".to_string());
+        .for_each(|track| {
+            let album_title = track.album.as_deref().unwrap_or("");
 
-            if !result.contains_key(&album_title) {
-                result.insert(album_title.clone(), QueryAlbum { tracks: Vec::new() });
+            if !result.contains_key(album_title) {
+                result.insert(album_title.to_string(), QueryAlbum { album_artist: track.album_artist, tracks: Vec::new() });
             }
 
-            result.get_mut(&album_title).unwrap().tracks.push(QueryTrack { id, title });
+            let track = QueryTrack {
+                id: track.id,
+                title: track.title,
+                artist: track.artist,
+                track_total: track.track_total,
+                track_number: track.track_number,
+                disc_number: track.disc_number,
+                disc_total: track.disc_total
+            };
+            result.get_mut(album_title).unwrap().tracks.push(track);
         });
 
     serde_json::to_string(&result).unwrap()

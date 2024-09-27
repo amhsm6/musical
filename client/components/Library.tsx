@@ -5,8 +5,11 @@ import Album from "@/components/Album";
 import type { QueryResult } from "@/types/library";
 
 const styles = StyleSheet.create({
+    list: {
+        paddingHorizontal: 20
+    },
     album: {
-        marginTop: 20
+        marginBottom: 20
     }
 });
 
@@ -18,7 +21,7 @@ type Props = {
 };
 
 export default function Library({ query, style }: Props): React.ReactNode {
-    const { data, isLoading, error } = useSWR<QueryResult>(`http://localhost:3015/api/audio/query?q=${query}`, jsonfetch);
+    const { data, isLoading, error } = useSWR<QueryResult>(`${process.env.EXPO_PUBLIC_URL}/api/audio/query?q=${query}`, jsonfetch);
 
     if (isLoading) {
         return <ActivityIndicator />;
@@ -31,8 +34,8 @@ export default function Library({ query, style }: Props): React.ReactNode {
     return (
         <FlatList
             data={ Object.entries(data) }
-            renderItem={ ({ item }) => <Album title={ item[0] } album={ item[1] } style={ styles.album } /> }
-            style={ style }
+            renderItem={ ({ item }) => <Album title={ item[0] || "Other" } album={ item[1] } style={ styles.album } /> }
+            style={{ ...styles.list, ...style }}
         >
         </FlatList>
     );
