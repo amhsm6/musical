@@ -20,18 +20,7 @@ type QueryResult = HashMap<String, QueryAlbum>;
 #[derive(Serialize)]
 struct QueryAlbum {
     album_artist: Option<String>,
-    tracks: Vec<QueryTrack>
-}
-
-#[derive(Serialize)]
-struct QueryTrack {
-    id: i32,
-    title: String,
-    artist: Option<String>,
-    track_number: Option<i32>,
-    track_total: Option<i32>,
-    disc_number: Option<i32>,
-    disc_total: Option<i32>
+    tracks: Vec<AudioTrack>
 }
 
 async fn query(conn: State<Arc<Mutex<PgConnection>>>, Query(query): Query<QueryParams>) -> String {
@@ -56,18 +45,9 @@ async fn query(conn: State<Arc<Mutex<PgConnection>>>, Query(query): Query<QueryP
             let album_title = track.album.as_deref().unwrap_or("");
 
             if !result.contains_key(album_title) {
-                result.insert(album_title.to_string(), QueryAlbum { album_artist: track.album_artist, tracks: Vec::new() });
+                result.insert(album_title.to_string(), QueryAlbum { album_artist: track.album_artist.clone(), tracks: Vec::new() });
             }
 
-            let track = QueryTrack {
-                id: track.id,
-                title: track.title,
-                artist: track.artist,
-                track_total: track.track_total,
-                track_number: track.track_number,
-                disc_number: track.disc_number,
-                disc_total: track.disc_total
-            };
             result.get_mut(album_title).unwrap().tracks.push(track);
         });
 

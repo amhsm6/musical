@@ -1,3 +1,4 @@
+use serde::Serialize;
 use diesel::prelude::*;
 
 #[derive(Insertable)]
@@ -14,7 +15,7 @@ pub struct NewAudioTrack {
     pub disc_total: Option<i32>
 }
 
-#[derive(Queryable, Selectable)]
+#[derive(Serialize, Queryable, Selectable)]
 #[diesel(table_name = crate::schema::audio)]
 pub struct AudioTrack {
     pub id: i32,

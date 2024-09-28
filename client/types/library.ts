@@ -10,7 +10,9 @@ export type Album = {
 export type Track = {
     id: number,
     title: string,
+    album: string | null,
     artist: String | null,
+    album_artist: string | null,
     track_number: number | null,
     track_total: number | null,
     disc_number: number | null,
