@@ -23,10 +23,9 @@ type Props = {
 export default function QueueItem({ track, playing, index }: Props): React.ReactNode {
     return (
         <View style={{ ...styles.row, borderTopWidth: index === 0 ? 0 : 3 }}>
-            <View style={{ width: "80%", flexDirection: "row" }}>
-                <ScrollingText style={{ width: "45%", marginRight: 10, fontWeight: "bold" }}>{ track.title }</ScrollingText>
-                <ScrollingText style={{ width: "25%", marginRight: 20 }}>{ track.album || "Other" }</ScrollingText>
-                <ScrollingText style={{ width: "20%" }}>{ track.artist }</ScrollingText>
+            <View style={{ width: "70%" }}>
+                <ScrollingText style={{ fontSize: 18, fontWeight: "bold" }}>{ track.title }</ScrollingText>
+                <ScrollingText>{ track.album || "Other" }</ScrollingText>
             </View>
             <View style={{ marginRight: 20 }}>
                 <Text>{ playing && "playing" }</Text>
