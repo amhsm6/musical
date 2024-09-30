@@ -1,10 +1,11 @@
 import React, { useContext } from "react";
-import ReactNative, { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import ReactNative, { StyleSheet, View, Text, Pressable } from "react-native";
 import QueueContext from "@/contexts/queue";
 import Track from "@/components/Track";
+import ScrollingText from "@/components/ScrollingText";
 import { Play, PlayNext } from "@/components/PlayIcons";
 import type { Album } from "@/types/library";
-import Feather from '@expo/vector-icons/Feather';
+import Feather from "@expo/vector-icons/Feather";
 
 const styles = StyleSheet.create({
     container: {
@@ -32,16 +33,16 @@ export default function Album({ title, album, style }: Props): React.ReactNode {
     return (
         <View style={{ ...styles.container, ...style }}>
             <View style={ styles.album_header }>
-                <View style={{ width: "90%", flexDirection: "row" }}>
+                <View style={{ width: "80%", flexDirection: "row" }}>
                     <Feather name="disc" size={ 50 } color="black" style={{ marginRight: 20 }} />
                     <View style={{ width: "90%" }}>
-                        <Text style={{ fontSize: 25, fontWeight: "bold" }}>{ title }</Text>
+                        <ScrollingText style={{ fontSize: 25, fontWeight: "bold" }}>{ title }</ScrollingText>
                         <Text style={{ color: "#222" }}>{ album.album_artist || "Unknown Artist" }</Text>
                     </View>
                 </View>
                 <View style={{ flexDirection: "row", marginTop: 10, marginRight: 15 }}>
-                    <TouchableOpacity onPress={ () => dispatch({ type: "play", tracks: album.tracks }) } style={{ marginRight: 15 }}><Play size={ 30 } /></TouchableOpacity>
-                    <TouchableOpacity onPress={ () => dispatch({ type: "play_next", tracks: album.tracks }) }><PlayNext size={ 30 } /></TouchableOpacity>
+                    <Pressable onPress={ () => dispatch({ type: "play", tracks: album.tracks }) } style={{ marginRight: 15 }}><Play size={ 30 } /></Pressable>
+                    <Pressable onPress={ () => dispatch({ type: "play_next", tracks: album.tracks }) }><PlayNext size={ 30 } /></Pressable>
                 </View>
             </View>
             <View>

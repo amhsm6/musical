@@ -1,5 +1,5 @@
-import React from "react";
-import ReactNative, { StyleSheet, Text, ActivityIndicator, FlatList } from "react-native";
+import React, { useEffect, useRef } from "react";
+import ReactNative, { StyleSheet, View, Text, ActivityIndicator, FlatList } from "react-native";
 import useSWR from "swr";
 import Album from "@/components/Album";
 import type { QueryResult } from "@/types/library";
@@ -21,6 +21,13 @@ type Props = {
 };
 
 export default function Library({ query, style }: Props): React.ReactNode {
+    const ref = useRef<FlatList>(null);
+
+    useEffect(() => {
+        if (!ref.current) { return; }
+        ref.current.scrollToOffset({ offset: 0, animated: false });
+    });
+
     const { data, isLoading, error } = useSWR<QueryResult>(`${process.env.EXPO_PUBLIC_URL}/api/audio/query?q=${query}`, jsonfetch);
 
     if (isLoading) {
@@ -32,11 +39,13 @@ export default function Library({ query, style }: Props): React.ReactNode {
     }
 
     return (
-        <FlatList
-            data={ Object.entries(data) }
-            renderItem={ ({ item }) => <Album title={ item[0] || "Other" } album={ item[1] } style={ styles.album } /> }
-            style={{ ...styles.list, ...style }}
-        >
-        </FlatList>
+        <View style={ style }>
+            <FlatList
+                ref={ ref }
+                data={ Object.entries(data) }
+                renderItem={ ({ item }) => <Album title={ item[0] || "Other" } album={ item[1] } style={ styles.album } /> }
+                style={ styles.list }
+            />
+        </View>
     );
 }

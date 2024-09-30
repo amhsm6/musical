@@ -43,7 +43,7 @@ export default function ScrollingText({ children, style }: Props): React.ReactNo
                 ref={ viewRef }
                 horizontal={ true }
                 showsHorizontalScrollIndicator={ false }
-                style={{ width: style?.width }}
+                style={{ cursor: "auto" }}
             >
                 <Text ref={ textRef } numberOfLines={ 1 } style={ style }>{ children }</Text>
             </ScrollView>

@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Pressable, Text } from "react-native";
 import QueueContext from "@/contexts/queue";
+import ScrollingText from "@/components/ScrollingText";
 import { Play, PlayNext } from "@/components/PlayIcons";
 import type { Track } from "@/types/library";
 
@@ -26,13 +27,17 @@ export default function Track({ track, index }: Props): React.ReactNode {
     return (
         <View style={{ ...styles.track, borderTopWidth: index === 0 ? 0 : 3 }}>
             <View style={{ width: "90%", flexDirection: "row" }}>
-                <Text numberOfLines={ 2 } style={{ width: "5%", marginRight: 10 }}>{ `${track.track_number || index + 1}.` }</Text>
-                <Text numberOfLines={ 2 } style={{ width: "30%", fontWeight: "bold", marginRight: 20 }}>{ track.title }</Text>
-                <Text numberOfLines={ 2 }>{ track.artist }</Text>
+                <Text style={{ width: "5%", marginRight: 10 }}>{ `${track.track_number || index + 1}.` }</Text>
+                <View style={{ width: "30%", marginRight: 20 }}>
+                    <ScrollingText style={{ fontWeight: "bold" }}>{ track.title }</ScrollingText>
+                </View>
+                <View style={{ width: "30%" }}>
+                    <ScrollingText>{ track.artist }</ScrollingText>
+                </View>
             </View>
             <View style={{ flexDirection: "row"  }}>
-                <TouchableOpacity onPress={ () => dispatch({ type: "play", tracks: [track] }) } style={{ marginRight: 15 }}><Play size={ 25 } /></TouchableOpacity>
-                <TouchableOpacity onPress={ () => dispatch({ type: "play_next", tracks: [track] }) }><PlayNext size={ 25 } /></TouchableOpacity>
+                <Pressable onPress={ () => dispatch({ type: "play", tracks: [track] }) } style={{ marginRight: 15 }}><Play size={ 25 } /></Pressable>
+                <Pressable onPress={ () => dispatch({ type: "play_next", tracks: [track] }) }><PlayNext size={ 25 } /></Pressable>
             </View>
         </View>
     );
