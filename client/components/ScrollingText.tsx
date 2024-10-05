@@ -21,7 +21,7 @@ export default function ScrollingText({ children, style }: Props): React.ReactNo
     });
 
     useEffect(() => {
-        const interval = setInterval(() => {
+        const interval = setInterval(() => { // FIXME: performance issue, rewrite so that intervals are created only when scrolling is active
             if (!viewRef.current) { return; }
 
             if (!scrolling.current) {
@@ -38,7 +38,12 @@ export default function ScrollingText({ children, style }: Props): React.ReactNo
     }, [textWidth]);
 
     return (
-        <Pressable onHoverIn={ () => scrolling.current = true } onHoverOut={ () => scrolling.current = false }>
+        <Pressable
+            onHoverIn={ () => scrolling.current = true }
+            onHoverOut={ () => scrolling.current = false }
+            onPressIn={ () => scrolling.current = true }
+            onPressOut={ () => scrolling.current = true }
+        >
             <ScrollView
                 ref={ viewRef }
                 horizontal={ true }

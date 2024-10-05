@@ -8,26 +8,64 @@ type State = {
 
 const initial: State = { queue: [], playing_index: null };
 
-type Action = {
-    type: "play" | "play_next",
-    tracks: Track[]
-};
+type Action = { type: "play", tracks: Track[] }
+            | { type: "play_next", tracks: Track[] }
+            | { type: "clear" }
+            | { type: "shuffle" }
+            | { type: "prev" }
+            | { type: "next" };
 
 const reducer: React.Reducer<State, Action> = (state, action) => {
     switch (action.type) {
         case "play":
             return {
-                queue: action.tracks,
+                queue: [...action.tracks],
                 playing_index: 0
             };
-            break;
 
         case "play_next":
             return {
-                ...state,
-                queue: [...state.queue, ...action.tracks]
+                queue: [...state.queue, ...action.tracks],
+                playing_index: state.playing_index || 0
             };
-            break;
+
+        case "clear":
+            return initial;
+
+        case "shuffle":
+            const queue = state.queue;
+
+            let start = 0;
+            let end = queue.length;
+
+            if (state.playing_index != null) {
+                [queue[0], queue[state.playing_index]] = [queue[state.playing_index], queue[0]];
+                start = 1;
+            }
+
+            while (start < end) {
+                const i = Math.floor(start + Math.random() * (end - start));
+                end--;
+
+                [queue[i], queue[end]] = [queue[end], queue[i]];
+            }
+
+            return {
+                queue,
+                playing_index: 0
+            };
+
+        case "prev":
+            return {
+                ...state,
+                playing_index: state.playing_index ? state.playing_index - 1 : state.playing_index
+            };
+
+        case "next":
+            return {
+                ...state,
+                playing_index: state.playing_index != null && state.playing_index < state.queue.length - 1 ? state.playing_index + 1 : state.playing_index
+            };
     }
 };
 
@@ -44,5 +82,5 @@ type Props = { children: React.ReactNode };
 
 export function QueueProvider({ children }: Props): React.ReactNode {
     const [state, dispatch] = useReducer(reducer, initial);
-    return <QueueContext.Provider value={{ state: state, dispatch: dispatch }}>{ children }</QueueContext.Provider>;
+    return <QueueContext.Provider value={{ state, dispatch }}>{ children }</QueueContext.Provider>;
 }

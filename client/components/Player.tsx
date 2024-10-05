@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import ReactNative, { StyleSheet, View } from "react-native";
+import ReactNative, { Pressable, StyleSheet, View } from "react-native";
 import QueueContext from "@/contexts/queue";
 import ScrollingText from "@/components/ScrollingText";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
 type Props = { style?: ReactNative.ViewStyle };
 
 export default function Player({ style }: Props): React.ReactNode {
-    const { state } = useContext(QueueContext);
+    const { state, dispatch } = useContext(QueueContext);
 
     if (state.playing_index === null) { return null; }
 
@@ -32,9 +32,15 @@ export default function Player({ style }: Props): React.ReactNode {
                 <ScrollingText>{ track.album || "Other" }</ScrollingText>
             </View>
             <View style={{ width: "25%", flexDirection: "row", justifyContent: "space-between" }}>
-                <AntDesign name="stepbackward" size={ 35 } />
-                <AntDesign name="play" size={ 35 } />
-                <AntDesign name="stepforward" size={ 35 } />
+                <Pressable onPress={ () => dispatch({ type: "prev" }) }>
+                    <AntDesign name="stepbackward" size={ 35 } />
+                </Pressable>
+                <Pressable>
+                    <AntDesign name="play" size={ 35 } />
+                </Pressable>
+                <Pressable onPress={ () => dispatch({ type: "next" }) }>
+                    <AntDesign name="stepforward" size={ 35 } />
+                </Pressable>
             </View>
         </View>
     );

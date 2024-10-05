@@ -39,6 +39,8 @@ const styles = StyleSheet.create({
     }
 });
 
+// FIXME: mobile layout
+
 export default function Index(): React.ReactNode {
     const [query, setQuery] = useState<string>("");
 
