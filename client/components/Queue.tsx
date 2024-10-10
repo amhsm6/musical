@@ -9,13 +9,16 @@ type Props = { style?: ReactNative.ViewStyle };
 
 export default function Queue({ style }: Props): React.ReactNode {
     const { state, dispatch } = useContext(QueueContext);
+    const playid = state.playing_index;
 
     const ref = useRef<FlatList>(null);
 
-    const item = state.playing_index != null ? state.queue[state.playing_index].id : -1;
+    const item = playid != null ? state.queue[playid].id : -1;
     useEffect(() => {
-        ref.current && state.playing_index != null && ref.current.scrollToIndex({ index: state.playing_index, animated: false });
-    }, [item, state.playing_index]);
+        if (!ref.current || playid === null) { return; }
+
+        ref.current.scrollToIndex({ index: playid > 1 ? playid - 2 : 0, animated: false });
+    }, [item, playid]);
 
     return (
         <View style={ style }>
@@ -34,7 +37,7 @@ export default function Queue({ style }: Props): React.ReactNode {
                 ref={ ref }
                 data={ state.queue }
                 keyExtractor={ (_, index) => index.toString() }
-                renderItem={ ({ item, index }) => <QueueItem track={ item } playing={ state.playing_index === index } index={ index } /> }
+                renderItem={ ({ item, index }) => <QueueItem track={ item } playing={ playid === index } index={ index } /> }
                 style={{ marginTop: 20, paddingRight: 30 }}
             />
         </View>
