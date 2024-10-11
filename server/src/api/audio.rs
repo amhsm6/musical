@@ -2,13 +2,17 @@ use crate::models::AudioTrack;
 
 use std::sync::Arc;
 use std::collections::HashMap;
+use tokio::io::AsyncReadExt;
 use tokio::sync::Mutex;
+use tokio::fs::File;
 use serde::{Serialize, Deserialize};
 use axum::routing;
 use axum::routing::Router;
-use axum::extract::{State, Query};
+use axum::body::Body;
+use axum::extract::{Path, Query, State};
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
+use symphonia::core::io::MediaSourceStream;
 
 #[derive(Deserialize)]
 struct QueryParams {
@@ -54,14 +58,17 @@ async fn query(conn: State<Arc<Mutex<PgConnection>>>, Query(query): Query<QueryP
     serde_json::to_string(&result).unwrap()
 }
 
-pub fn router() -> Router<Arc<Mutex<PgConnection>>> {
-    Router::new()
-        .route("/query", routing::get(query))
-}
+async fn stream(conn: State<Arc<Mutex<PgConnection>>>, id: Path<i32>) -> Vec<u8> {
+    let conn = &mut *conn.lock().await;
+    let id = id.0;
 
-//        .route("/track/{id}", web::get().to(get_track))
-    /*let src = File::open(filename).unwrap();
-    let mss = MediaSourceStream::new(Box::new(src), Default::default());
+    let path = crate::schema::audio::table
+        .filter(crate::schema::audio::id.eq(id))
+        .select(crate::schema::audio::path)
+        .first::<String>(conn).unwrap();
+
+    let mut src = File::open(path).await.unwrap();
+    /*let mss = MediaSourceStream::new(Box::new(src), Default::default());
 
     let probe = symphonia::default::get_probe()
         .format(
@@ -77,11 +84,20 @@ pub fn router() -> Router<Arc<Mutex<PgConnection>>> {
 
     let sample_rate = track.codec_params.sample_rate.unwrap();
     let numsamples  = track.codec_params.n_frames.unwrap();
-    let channels    = track.codec_params.channels.unwrap().count();
+    let channels  = track.codec_params.channels.unwrap().count();
     let bitdepth    = track.codec_params.bits_per_sample.unwrap();
 
     let decoder = symphonia::default::get_codecs()
         .make(&track.codec_params, &Default::default())
-        .unwrap();
+        .unwrap();*/
+    let mut buf = Vec::new();
+    src.read_to_end(&mut buf).await.unwrap();
 
-    format!("{} {} {} {}", sample_rate, numsamples, channels, bitdepth)*/
+    buf
+}
+
+pub fn router() -> Router<Arc<Mutex<PgConnection>>> {
+    Router::new()
+        .route("/query", routing::get(query))
+        .route("/stream/:id", routing::get(stream))
+}

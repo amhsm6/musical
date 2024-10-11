@@ -27,6 +27,8 @@ type Props = {
     style?: ReactNative.ViewStyle
 };
 
+// TODO: Album expanding/collapsing
+
 export default function Album({ title, album, style }: Props): React.ReactNode {
     const { dispatch } = useContext(QueueContext);
 

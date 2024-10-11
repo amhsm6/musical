@@ -20,6 +20,8 @@ type Props = {
     index: number
 };
 
+// TODO: item removal
+
 export default function QueueItem({ track, playing, index }: Props): React.ReactNode {
     return (
         <View style={{ ...styles.row, borderTopWidth: index === 0 ? 0 : 3 }}>
