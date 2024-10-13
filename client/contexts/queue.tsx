@@ -1,5 +1,6 @@
-import React, { createContext, useReducer } from "react";
+import React, { createContext, useEffect, useReducer } from "react";
 import type { Track } from "@/types/library";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type State = {
     queue: Track[],
@@ -8,7 +9,8 @@ type State = {
 
 const initial: State = { queue: [], playing_index: null };
 
-type Action = { type: "play", tracks: Track[] }
+type Action = { type: "load", state: State }
+            | { type: "play", tracks: Track[] }
             | { type: "play_next", tracks: Track[] }
             | { type: "clear" }
             | { type: "shuffle" }
@@ -17,6 +19,9 @@ type Action = { type: "play", tracks: Track[] }
 
 const reducer: React.Reducer<State, Action> = (state, action) => {
     switch (action.type) {
+        case "load":
+            return action.state;
+
         case "play":
             return {
                 queue: [...action.tracks],
@@ -82,5 +87,14 @@ type Props = { children: React.ReactNode };
 
 export function QueueProvider({ children }: Props): React.ReactNode {
     const [state, dispatch] = useReducer(reducer, initial);
+
+    useEffect(() => {
+        AsyncStorage.getItem("queue").then(q => q && dispatch({ type: "load", state: JSON.parse(q) }));
+    }, []);
+
+    useEffect(() => {
+        AsyncStorage.setItem("queue", JSON.stringify(state));
+    }, [state]);
+
     return <QueueContext.Provider value={{ state, dispatch }}>{ children }</QueueContext.Provider>;
 }
